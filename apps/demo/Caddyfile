@@ -1,0 +1,23 @@
+# Caddy serves the built demo SPA on Cloud Run's $PORT (defaults to 8080).
+{
+	auto_https off
+	admin off
+}
+
+:8080 {
+	root * /srv
+	encode gzip zstd
+	try_files {path} /index.html
+	file_server
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "interest-cohort=()"
+		# CSP intentionally permissive for the demo; tighten before v1.0.
+		Cache-Control "public, max-age=300"
+	}
+	log {
+		output stdout
+		format console
+	}
+}

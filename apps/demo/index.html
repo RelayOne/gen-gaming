@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FrameBright Generative Gaming — Demo</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <main id="app">
+      <header>
+        <h1>FrameBright generative gaming</h1>
+        <p class="tagline">
+          AEGIS-gated. R1-powered. Sub-800ms regen target.
+        </p>
+      </header>
+
+      <section class="stage">
+        <canvas id="scene" width="640" height="360"></canvas>
+        <p id="caption" class="caption" aria-live="polite"></p>
+      </section>
+
+      <section class="controls">
+        <label for="prompt">Prompt</label>
+        <textarea
+          id="prompt"
+          rows="2"
+          placeholder="e.g. add a friendly goblin near the exit"
+        ></textarea>
+        <div class="row">
+          <button id="regenerate" type="button">Regenerate</button>
+          <span id="busy" class="badge" hidden>working…</span>
+        </div>
+      </section>
+
+      <section class="status" aria-live="polite">
+        <h2>Status</h2>
+        <dl>
+          <dt>Last regen latency</dt>
+          <dd id="latency">—</dd>
+          <dt>AEGIS verdict</dt>
+          <dd id="aegis">—</dd>
+          <dt>R1 reasoning</dt>
+          <dd id="reasoning">—</dd>
+          <dt>Attempts</dt>
+          <dd id="attempts">—</dd>
+        </dl>
+        <p id="block-banner" class="block-banner" hidden></p>
+      </section>
+    </main>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
