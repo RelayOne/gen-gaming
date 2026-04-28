@@ -86,16 +86,35 @@ steps:
       - -c
       - |
         set -euo pipefail
-        gcloud run deploy "${_SERVICE_NAME}" \
-          --image "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA" \
-          --region "${_REGION}" \
-          --platform managed \
-          --allow-unauthenticated \
-          --port 8080 \
-          --cpu 1 --memory 512Mi \
-          --min-instances 0 --max-instances 5 \
-          --set-env-vars "NODE_ENV=production" \
-          --set-secrets "R1_API_KEY=gen-gaming-r1-api-key:latest,AEGIS_API_KEY=gen-gaming-aegis-api-key:latest,SCENE_STORE_KMS_KEY=gen-gaming-scene-store-kms-key:latest"
+        # Secrets are wired only when the named secrets exist in this project.
+        # First deploy uses dev-fakes (the demo runs offline); production
+        # deploy attaches R1 + AEGIS + KMS once those secrets are provisioned.
+        SECRETS_FLAG=""
+        for s in gen-gaming-r1-api-key gen-gaming-aegis-api-key gen-gaming-scene-store-kms-key; do
+          if gcloud secrets describe "$s" --project="$PROJECT_ID" >/dev/null 2>&1; then
+            : # exists
+          else
+            SECRETS_FLAG="missing"
+            break
+          fi
+        done
+        if [ -z "$SECRETS_FLAG" ]; then
+          gcloud run deploy "${_SERVICE_NAME}" \
+            --image "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA" \
+            --region "${_REGION}" --platform managed --allow-unauthenticated \
+            --port 8080 --cpu 1 --memory 512Mi \
+            --min-instances 0 --max-instances 5 \
+            --set-env-vars "NODE_ENV=production" \
+            --set-secrets "R1_API_KEY=gen-gaming-r1-api-key:latest,AEGIS_API_KEY=gen-gaming-aegis-api-key:latest,SCENE_STORE_KMS_KEY=gen-gaming-scene-store-kms-key:latest"
+        else
+          echo "Secrets not provisioned yet — deploying in dev-fakes mode."
+          gcloud run deploy "${_SERVICE_NAME}" \
+            --image "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA" \
+            --region "${_REGION}" --platform managed --allow-unauthenticated \
+            --port 8080 --cpu 1 --memory 512Mi \
+            --min-instances 0 --max-instances 5 \
+            --set-env-vars "NODE_ENV=production"
+        fi
 
 images:
   - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA"
