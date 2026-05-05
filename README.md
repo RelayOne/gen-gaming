@@ -107,3 +107,8 @@ No GitHub Actions are used (per portfolio policy).
 ## License
 
 Apache-2.0. See `LICENSE`.
+
+## Environments
+
+Single-branch model: `main` is the only env branch; protected against force-push and deletion (per portfolio spec 07).
+
